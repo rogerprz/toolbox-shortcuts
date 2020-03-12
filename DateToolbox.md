@@ -40,4 +40,4 @@ console.log(ts.toISOString());
 * toUTCString()- Converts a Date object to a string, according to universal time
 
 
-Found the information (here)[https://timestamp.online/article/how-to-convert-timestamp-to-datetime-in-javascript]
+[Resource found here](https://timestamp.online/article/how-to-convert-timestamp-to-datetime-in-javascript)
