@@ -14,3 +14,9 @@ enable to turn on/off features in ADO
 1. netstat -aon | findstr 8080
 2. Look for listen `TCP 0.0.0.0:8080 0.0.0.0:0 LISTEN 77777`
 3. `taskkill /f /pid` 77777
+
+
+# Macbook
+
+### SSH Keys
+* `pbcopy < ~/.ssh/id_rsa.pub`
