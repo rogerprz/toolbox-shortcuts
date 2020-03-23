@@ -2,6 +2,13 @@
 enable to turn on/off features in ADO
 `document.cookie = "features-dev-mode=true;path=/"`
 
+
+# Git
+
+### Remove cached tracked files
+* `git rm -r --cached .`
+* Replace `.` with a specific file name if you want to untrack only a specific file or folder.
+
 # Windows
 
 ## SSH Keys
