@@ -16,13 +16,20 @@ enable to turn on/off features in ADO
 
 * [Git log cheatsheet](https://devhints.io/git-log)
 
-# Windows
 
 ## SSH Keys
+
 * See output `cat ~/.ssh/id_rsa.pub`
+
+### Windows
 * Copy `clip < ~/.ssh/id_rsa.pub`
 
+### Macbook
+* `pbcopy < ~/.ssh/id_rsa.pub`
+
+
 ## Terminate local host
+### Windows
 
 ### Kill process port
 1. netstat -aon | findstr 8080
@@ -30,7 +37,4 @@ enable to turn on/off features in ADO
 3. `taskkill /f /pid` 77777
 
 
-# Macbook
 
-### SSH Keys
-* `pbcopy < ~/.ssh/id_rsa.pub`
