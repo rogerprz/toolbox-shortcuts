@@ -14,7 +14,7 @@ enable to turn on/off features in ADO
 
 ## Quick shortcuts 
 
-* (Git log cheatsheet)[https://devhints.io/git-log]
+* [Git log cheatsheet](https://devhints.io/git-log)
 
 # Windows
 
