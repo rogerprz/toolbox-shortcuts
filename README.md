@@ -12,6 +12,10 @@ enable to turn on/off features in ADO
 ### Reset git
 * `git reset`
 
+## Quick shortcuts 
+
+* (Git log cheatsheet)[https://devhints.io/git-log]
+
 # Windows
 
 ## SSH Keys
