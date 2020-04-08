@@ -1,0 +1,70 @@
+[github]
+	name = Roger Perez
+	user = rogerprz
+	token = <API token> # https://github.com/settings/applications
+	email = rogerprz@github.com
+
+[user]
+	email = rogerprz@github.com
+	name = Roger Perez
+
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+	last = log -1 HEAD
+	db = branch -d
+	df = diff
+	Del = branch -D
+	pog = pull origin master
+	reset-soft = reset --soft HEAD~1
+	reset-hard = reset --hard HEAD~1
+	lg = log -p
+	who = shortlog -s --
+	up = pull
+    pr = pull --rebase
+    pu = !"git fetch origin -v; git fetch upstream -v; git merge upstream/master"
+    switch = !legit switch \"$@\"
+    branches = !legit branches
+    sprout = !legit sprout \"$@\"
+    unpublish = !legit unpublish \"$@\"
+    harvest = !legit harvest \"$@\"
+    sync = !legit sync \"$@\"
+    publish = !legit publish \"$@\"
+    graft = !legit graft \"$@\"
+
+    quote-string = "!read -r l; printf \\\"!; printf %s \"$l\" | sed 's/\\([\\\"]\\)/\\\\\\1/g'; printf \" #\\\"\\n\" #"
+    prune-local = "!git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -D #"
+
+[color]
+  ui = true
+  diff = auto
+  status = auto
+  branch = auto
+[format]
+  pretty = %C(yellow)%h%Creset %s %C(red)(%an, %cr)%Creset
+[diff "ruby"]
+  funcname = ^ *\\(\\(class\\|module\\|def\\) .*\\)
+[push]
+  default =  current #matching
+
+[core]
+	# editor = code
+	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	excludesfile = ~/.gitignore
+[github]
+	user = rogerprz
+[credential]
+	helper = osxkeychain
+
+
+
+# [difftool "sourcetree"]
+#   cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+#   path =
+# [mergetool "sourcetree"]
+#   cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+#   trustExitCode = true
+# [merge]
+#   tool = opendiff
