@@ -7,14 +7,10 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  windows-build:
     runs-on: windows-latest
-
     steps:
-    - name: run powershell
-      shell: powershell -NoProfile -Command "& '{0}'"
-      run: |-
-        echo $Env:Path
-        echo "We did it"
-        
+      - name: run powershell
+        shell: PowerShell -NoProfile -Command "& '{0}'"
+        run: |
+          echo $Env:Path
