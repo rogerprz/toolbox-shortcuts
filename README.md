@@ -6,8 +6,46 @@ enable to turn on/off features in ADO
 # Git
 
 ### Cloning a repo
+1. Open Terminal 
+1. Make new directory `mkdir` (note that you may not need to create a new directory depending on the project)
+1. Navigate to newly created directory `cd`
+1. Paste https copied from GitHub `git clone <git-url>`
+1. See list of copied items `ls`
+1. Open item in VS code `code .`
 
-* 
+### Pushing a Commit
+1. In Terminal `git status`
+    * shows the current status w/in the repo
+1. `git add .`
+    * command adds ALL tracked and untracked files to a commit
+    * Alternate: `git add <file name>` add single file 
+1. `git commit -m " add message here"` add a note to the file when uploaded
+1. `git push` command pushes changes to original repo (wherever orginal doc was cloned)  
+
+### Git Remote Origin 
+
+command : `git config --get remote.origin.url` gets remote origin url
+
+Output 
+```
+https://github.com/rogerprz/toolbox-shortcuts.git
+```
+command: `git remote show origin` shows the remote origin url in detail
+
+Output: 
+```
+
+remote origin
+  Fetch URL: https://github.com/rogerprz/toolbox-shortcuts.git
+  Push  URL: https://github.com/rogerprz/toolbox-shortcuts.git
+  HEAD branch: master
+  Remote branch:
+    master tracked
+  Local branch configured for 'git pull':
+    master merges with remote master
+  Local ref configured for 'git push':
+    master pushes to master (up to date)
+```
 
 ### Remove cached tracked files
 * `git rm -r --cached .`
