@@ -5,6 +5,10 @@ enable to turn on/off features in ADO
 
 # Git
 
+### Cloning a repo
+
+* 
+
 ### Remove cached tracked files
 * `git rm -r --cached .`
 * Replace `.` with a specific file name if you want to untrack only a specific file or folder.
