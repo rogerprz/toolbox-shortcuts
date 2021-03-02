@@ -5,6 +5,8 @@ enable to turn on/off features in ADO
 
 # Git
 
+- [.gitconfig](./gitconfig-template) template
+
 ### Cloning a repo
 1. Open Terminal 
 1. Make new directory `mkdir` (note that you may not need to create a new directory depending on the project)
