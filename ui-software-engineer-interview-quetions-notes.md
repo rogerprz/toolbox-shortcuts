@@ -29,3 +29,14 @@ So element will be fixed at that position.
 
 **Inline-block:**
 - It is similar to the inline element and follows the page flow. The only difference is that it will consider height and width.
+
+
+## What is the difference between window and document?
+
+**Window**:
+- The **window** is the interface that contains the Document Object Model (DOM)
+JavaScript uses a global object, and everything runs under it, which is called a window and a global object, which holds global variables, global functions, history and location under it. Along with it, Ajax, setTimeout, console and local storage are also under the window.
+
+**Document**
+- A **document** is also under the window as it is a property of the window object. 
+- The document property is where you're able to  get elements by getElementById, addEventListener on the document.
