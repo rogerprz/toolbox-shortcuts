@@ -6,6 +6,7 @@ enable to turn on/off features in ADO
 # Git
 
 - [.gitconfig](./gitconfig-template) template
+- [Useful commands](./gitCommands.md) 
 
 ### Cloning a repo
 1. Open Terminal 
