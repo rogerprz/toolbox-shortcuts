@@ -12,6 +12,10 @@ enable to turn on/off features in ADO
 
 - `--local`: This option specifies that you want to edit the local configuration file for the current Git repository. The local configuration is specific to a particular repository and is stored in the .git/config file within that repository.
 - `-e`: This option opens the configuration file in the default text editor. It stands for "edit."
+
+**Uses:**
+- When you clone a git repository and you're trying to push it to a new remote origin. You can delete content or update origin data to point to correct version
+- Review the current git configurations and make changes
 ```
 git config --local -e
 ```
