@@ -3,27 +3,18 @@ enable to turn on/off features in ADO
 `document.cookie = "features-dev-mode=true;path=/"`
 
 
-# Git
+## Git
 
 - [.gitconfig](./gitconfig-template) template
 - [Useful commands](./gitCommands.md) 
 
-### Cloning a repo
-1. Open Terminal 
-1. Make new directory `mkdir` (note that you may not need to create a new directory depending on the project)
-1. Navigate to newly created directory `cd`
-1. Paste https copied from GitHub `git clone <git-url>`
-1. See list of copied items `ls`
-1. Open item in VS code `code .`
+### Review local git config and edit
 
-### Pushing a Commit
-1. In Terminal `git status`
-    * shows the current status w/in the repo
-1. `git add .`
-    * command adds ALL tracked and untracked files to a commit
-    * Alternate: `git add <file name>` add single file 
-1. `git commit -m " add message here"` add a note to the file when uploaded
-1. `git push` command pushes changes to original repo (wherever orginal doc was cloned)  
+- `--local`: This option specifies that you want to edit the local configuration file for the current Git repository. The local configuration is specific to a particular repository and is stored in the .git/config file within that repository.
+- `-e`: This option opens the configuration file in the default text editor. It stands for "edit."
+```
+git config --local -e
+```
 
 ### Git Remote Origin 
 
