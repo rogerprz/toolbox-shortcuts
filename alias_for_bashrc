@@ -1,3 +1,5 @@
+# .bashrc
+
 export PATH="$PATH:/c/Users/$USERNAME/AppData/Local/Programs/Microsoft VS Code/bin"
 # or if VS Code is installed in Program Files:
 export PATH="$PATH:/c/Program Files/Microsoft VS Code/bin"
