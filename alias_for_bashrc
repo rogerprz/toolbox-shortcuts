@@ -1,10 +1,16 @@
-# .bashrc
-
 export PATH="$PATH:/c/Users/$USERNAME/AppData/Local/Programs/Microsoft VS Code/bin"
 # or if VS Code is installed in Program Files:
 export PATH="$PATH:/c/Program Files/Microsoft VS Code/bin"
 
-alias code='start "" "C:/Program Files/Microsoft VS Code/Code.exe"'
+# Check common locations
+# For new VSCode installation you need to locate it first
+# ls "/c/Program Files/Microsoft VS Code/Code.exe" 2>/dev/null || echo "Not in Program Files"
+# ls "/c/Users/$USERNAME/AppData/Local/Programs/Microsoft VS Code/Code.exe" 2>/dev/null || echo "Not in Local Programs"
+# NOTE: takes a while to find, only use if the top doesn't work:
+# find /c -name "Code.exe" 2>/dev/null | grep -i "vs code"
+
+
+alias code='"C:/Program Files/Microsoft VS Code/Code.exe"'
 
 # Navigation
 alias ll='ls -la'
@@ -224,3 +230,11 @@ alias gupomi='git pull --rebase=interactive origin $(git_main_branch)'
 alias gupv='git pull --rebase -v'
 alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+alias vstsF='vsts-npm-auth -config .npmrc -F'
+alias betterF='better-vsts-npm-auth -config .npmrc -F'
+
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
