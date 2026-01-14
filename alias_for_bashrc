@@ -11,8 +11,8 @@ export PATH="$PATH:/c/Program Files/Microsoft VS Code/bin"
 # NOTE: takes a while to find, only use if the top doesn't work:
 # find /c -name "Code.exe" 2>/dev/null | grep -i "vs code"
 
-
-alias code='"C:/Program Files/Microsoft VS Code/Code.exe"'
+# To be used with explorer.exe
+# alias code='"C:/Program Files/Microsoft VS Code/Code.exe"'
 
 # Navigation
 alias ll='ls -la'
@@ -27,9 +27,9 @@ alias nr='npm run'
 alias nrd='npm run dev'
 alias nrb='npm run build'
 
-alias reload='source ~/.bashrc && echo "bashrc reloaded" && echo "to open bashrc type: aliases"'
+alias reload='source ~/.zshrc && echo "Zsh reloaded"'
 
-alias aliases='code ~/.bashrc'
+alias aliases='code ~/.oh-my-zsh/custom/aliases.zsh'
 
 alias 1='cd ..'
 alias 2='cd ../..'
@@ -42,7 +42,7 @@ alias 8='cd ../../../../../../../..'
 alias 9='cd ../../../../../../../../..'
 
 # Windows
-alias open='explorer.exe' # Similar to Mac's open command
+# alias open='explorer.exe' # Similar to Mac's open command
 
 
 
@@ -153,7 +153,7 @@ alias glum='git pull upstream $(git_main_branch)'
 alias gm='git merge'
 alias gma='git merge --abort'
 alias gmd='git merge develop'
-alias gmm='git merge main'
+alias gmm='git merge master'
 alias gmom='git merge origin/$(git_main_branch)'
 alias gmtl='git mergetool --no-prompt'
 alias gmtlvim='git mergetool --no-prompt --tool=vimdiff'
@@ -236,6 +236,12 @@ alias vstsF='vsts-npm-auth -config .npmrc -F'
 alias betterF='better-vsts-npm-auth -config .npmrc -F'
 
 
+
+
+# Snapchat 
+alias snap-refresh='snapaccess credentials refresh'
+alias gci-run='~/Snapchat/Dev/search/tools/git-hooks/gci.sh '
+alias gci-staged='~/Snapchat/Dev/search/tools/git-hooks/gci.sh $(git diff --cached --name-only --diff-filter=ACM | grep "\.go$")'
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
