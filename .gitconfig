@@ -1,70 +1,216 @@
-[github]
-	name = Roger Perez
-	user = rogerprz
-	token = <API token> # https://github.com/settings/applications
-	email = rogerprz@github.com
-
+# ==============================================================================
+# Default personal identity
+# ==============================================================================
 [user]
-	email = rogerperez.us@gmail.com
 	name = Roger Perez
+	email = rogerperez.us@gmail.com
 
-[alias]
-	co = checkout
-	br = branch
-	ci = commit
-	st = status
-	last = log -1 HEAD
-	db = branch -d
-	df = diff
-	Del = branch -D
-	pog = pull origin master
-	reset-soft = reset --soft HEAD~1
-	reset-hard = reset --hard HEAD~1
-	lg = log -p
-	who = shortlog -s --
-	up = pull
-    pr = pull --rebase
-    pu = !"git fetch origin -v; git fetch upstream -v; git merge upstream/master"
-    switch = !legit switch \"$@\"
-    branches = !legit branches
-    sprout = !legit sprout \"$@\"
-    unpublish = !legit unpublish \"$@\"
-    harvest = !legit harvest \"$@\"
-    sync = !legit sync \"$@\"
-    publish = !legit publish \"$@\"
-    graft = !legit graft \"$@\"
 
-    quote-string = "!read -r l; printf \\\"!; printf %s \"$l\" | sed 's/\\([\\\"]\\)/\\\\\\1/g'; printf \" #\\\"\\n\" #"
-    prune-local = "!git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -D #"
+# ==============================================================================
+# Repository-specific configuration
+# ==============================================================================
+# Repositories under this directory also load ~/.gitconfig-webflow.
+[includeIf "gitdir:/Users/roger/Sites/webflow/"]
+	path = ~/.gitconfig-webflow
 
-[color]
-  ui = true
-  diff = auto
-  status = auto
-  branch = auto
-[format]
-  pretty = %C(yellow)%h%Creset %s %C(red)(%an, %cr)%Creset
-[diff "ruby"]
-  funcname = ^ *\\(\\(class\\|module\\|def\\) .*\\)
-[push]
-  default =  current #matching
 
+# ==============================================================================
+# Core Git behavior
+# ==============================================================================
 [core]
-	# editor = code
+	# Detect common whitespace errors.
 	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
-	excludesfile = ~/.gitignore
-[github]
-	user = rogerprz
+
+	# Optional: global ignore rules shared by every repository.
+	# Enable this after creating ~/.gitignore_global.
+	# excludesFile = ~/.gitignore_global
+
+	# Optional: use VS Code for commit messages and interactive operations.
+	# editor = code --wait
+
+
+# ==============================================================================
+# Credentials
+# ==============================================================================
 [credential]
+	# Store supported Git credentials in macOS Keychain.
 	helper = osxkeychain
 
 
+# ==============================================================================
+# Push behavior
+# ==============================================================================
+[push]
+	# Set the upstream automatically the first time a branch is pushed.
+	autoSetupRemote = true
 
-# [difftool "sourcetree"]
-#   cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-#   path =
-# [mergetool "sourcetree"]
-#   cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-#   trustExitCode = true
-# [merge]
-#   tool = opendiff
+	# Push the current branch to a remote branch with the same name.
+	default = current
+
+
+# ==============================================================================
+# Pull behavior
+# ==============================================================================
+[pull]
+	# Rebase local commits over incoming commits instead of creating an
+	# automatic merge commit.
+	rebase = true
+
+
+# ==============================================================================
+# Fetch behavior
+# ==============================================================================
+[fetch]
+	# Remove stale remote-tracking references during fetch.
+	# This does not delete local branches.
+	prune = true
+
+
+# ==============================================================================
+# Optional rebase conveniences
+# ==============================================================================
+[rebase]
+	# Nice to have: automatically stash uncommitted changes before rebasing
+	# and restore them afterward.
+	# autoStash = true
+
+
+# ==============================================================================
+# Optional conflict-resolution memory
+# ==============================================================================
+[rerere]
+	# Nice to have: remember and reuse conflict resolutions during future
+	# rebases or merges.
+	# enabled = true
+
+
+# ==============================================================================
+# New repository defaults
+# ==============================================================================
+[init]
+	# Use "main" when running `git init`.
+	defaultBranch = main
+
+
+# ==============================================================================
+# Output colors
+# ==============================================================================
+[color]
+	# Enable colors when Git output is displayed in a terminal.
+	ui = auto
+
+
+# ==============================================================================
+# Optional log formatting
+# ==============================================================================
+[format]
+	# Nice to have: display the abbreviated hash, subject, author, and relative
+	# commit age in commands that use format.pretty.
+	# pretty = %C(yellow)%h%Creset %s %C(red)(%an, %cr)%Creset
+
+
+# ==============================================================================
+# Convenience aliases
+# ==============================================================================
+[alias]
+	# Compact status with branch information.
+	st = status --short --branch
+
+	# Traditional shortcuts.
+	co = checkout
+	br = branch
+	ci = commit
+	df = diff
+
+	# Modern command for switching branches.
+	sw = switch
+
+	# Show staged changes.
+	ds = diff --staged
+
+	# Show the latest commit.
+	last = log -1 HEAD
+
+	# Display a compact, decorated commit graph.
+	lg = log --graph --decorate --oneline --all
+
+	# Pull using the configured rebase behavior.
+	up = pull
+
+	# Nice to have: undo the latest commit while keeping its changes staged.
+	# This rewrites local history.
+	# undo = reset --soft HEAD~1
+
+	# Nice to have: delete a fully merged local branch.
+	# Git refuses if the branch contains unmerged commits.
+	# db = branch -d
+
+
+# ==============================================================================
+# Optional Ruby diff behavior
+# ==============================================================================
+# Nice to have if you regularly work with Ruby. This helps Git identify class,
+# module, and method boundaries in diffs.
+#
+# [diff "ruby"]
+# 	funcname = ^ *\\(\\(class\\|module\\|def\\) .*\\)
+
+
+# ==============================================================================
+# GitHub authentication
+# ==============================================================================
+# Do not store GitHub API tokens in this file.
+#
+# Authenticate GitHub CLI separately:
+#
+#     gh auth login
+#
+# The legacy [github] user, email, and token settings are unnecessary.
+
+
+# ==============================================================================
+# Intentionally omitted destructive aliases
+# ==============================================================================
+# These can accidentally discard commits or changes:
+#
+# [alias]
+# 	reset-hard = reset --hard HEAD~1
+# 	Del = branch -D
+
+
+# ==============================================================================
+# Intentionally omitted branch-specific aliases
+# ==============================================================================
+# Avoid aliases hardcoded to master, main, or dev because repositories use
+# different default and integration branches:
+#
+# [alias]
+# 	pog = pull origin master
+# 	pu = !"git fetch origin -v; git fetch upstream -v; git merge upstream/master"
+
+
+# ==============================================================================
+# Intentionally omitted third-party aliases
+# ==============================================================================
+# Enable these only if `legit` is still installed and part of your workflow:
+#
+# [alias]
+# 	switch = !legit switch \"$@\"
+# 	branches = !legit branches
+# 	sprout = !legit sprout \"$@\"
+# 	unpublish = !legit unpublish \"$@\"
+# 	harvest = !legit harvest \"$@\"
+# 	sync = !legit sync \"$@\"
+# 	publish = !legit publish \"$@\"
+# 	graft = !legit graft \"$@\"
+
+
+# ==============================================================================
+# Optional local branch cleanup
+# ==============================================================================
+# Nice to have, but potentially destructive: deletes local branches whose
+# upstream branches no longer exist. Those branches could still contain local,
+# unpushed commits.
+#
+# [alias]
+# 	prune-local = "!git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs git branch -D #"
