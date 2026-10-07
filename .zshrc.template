@@ -5,7 +5,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="agnoster"
-plugins=(git node npm macos brew z eza zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git node npm macos brew gh vscode z eza zsh-autosuggestions zsh-syntax-highlighting)
 
 # Load NVM when installed through Homebrew.
 export NVM_DIR="$HOME/.nvm"
