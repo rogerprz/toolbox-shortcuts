@@ -138,7 +138,7 @@ install_cask() {
     fi
 }
 
-# Use a local tap for the requested legacy versions, not today's Alfred/Snagit.
+# Use a local tap for the requested Snagit 2022 version.
 install_legacy_cask() {
     local cask="$1" tap_dir
     shift
@@ -407,7 +407,7 @@ fi
 install_cask chatgpt "ChatGPT.app"
 install_cask claude "Claude.app"
 install_cask iterm2 "iTerm.app" "iTerm2.app"
-install_legacy_cask alfred3 "Alfred 3.app" "Alfred 4.app" "Alfred 5.app" "Alfred 6.app" "Alfred.app"
+install_cask alfred "Alfred 5.app"
 install_legacy_cask snagit22 "Snagit 2022.app" "Snagit.app" "Snagit 2023.app" "Snagit 2024.app" "Snagit 2025.app" "Snagit 2026.app"
 
 # Query Apple's current release instead of pinning an Xcode version.
