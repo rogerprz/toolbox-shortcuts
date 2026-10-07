@@ -190,29 +190,88 @@ setup_git_config() {
 }
 
 setup_shell_config() {
-    if [ ! -d "$HOME/.oh-my-zsh" ]; then
-        echo "Installing Oh My Zsh..."
-        if ! omz_installer="$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" ||
-           ! RUNZSH=no CHSH=no sh -c "$omz_installer"; then
-            echo "Skipping Oh My Zsh after install failed; continuing setup." >&2
-            record_skipped "Oh My Zsh (install failed)"
+    if [ ! -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ]; then
+        echo "Installing or repairing Oh My Zsh..."
+        install_formula git brew-only
+        local omz_custom_dir="$HOME/.oh-my-zsh/custom"
+        local omz_target="$HOME/.oh-my-zsh"
+        local omz_stage=""
+        local omz_backup=""
+        local omz_ready=0
+
+        if omz_stage="$(mktemp -d)" && git clone --depth 1 https://github.com/ohmyzsh/ohmyzsh.git "$omz_stage/framework" >/dev/null 2>&1 &&
+           [ -f "$omz_stage/framework/oh-my-zsh.sh" ]; then
+            if [ -e "$omz_target" ]; then
+                omz_backup="${omz_target}.toolbox-backup.$(date +%Y%m%d%H%M%S)"
+                if ! mv "$omz_target" "$omz_backup"; then
+                    echo "Skipping Oh My Zsh repair: couldn't preserve the incomplete directory." >&2
+                    record_skipped "Oh My Zsh (existing directory could not be moved)"
+                fi
+            fi
+            if [ ! -e "$omz_target" ] && mv "$omz_stage/framework" "$omz_target"; then
+                omz_ready=1
+                if [ -n "$omz_backup" ] && [ -d "$omz_backup/custom" ]; then
+                    mkdir -p "$omz_custom_dir"
+                    if cp -R "$omz_backup/custom/." "$omz_custom_dir/"; then
+                        echo "Preserved custom Oh My Zsh files from $omz_backup/custom."
+                    else
+                        echo "Warning: couldn't restore all custom Oh My Zsh files; backup remains at $omz_backup." >&2
+                    fi
+                fi
+                if [ -n "$omz_backup" ]; then
+                    echo "Preserved the previous incomplete Oh My Zsh directory at $omz_backup."
+                fi
+                record_installed "Oh My Zsh framework"
+            fi
         else
-            record_installed "Oh My Zsh"
+            echo "Skipping Oh My Zsh install after download/clone failure; setup will continue." >&2
+            record_skipped "Oh My Zsh (download or clone failed)"
+        fi
+        [ -z "$omz_stage" ] || rm -rf "$omz_stage"
+        if [ "$omz_ready" -eq 0 ] && [ -n "$omz_backup" ] && [ -e "$omz_backup" ] && [ ! -e "$omz_target" ]; then
+            mv "$omz_backup" "$omz_target"
         fi
     else
         record_skipped "Oh My Zsh (already installed)"
     fi
 
-    if [ ! -f "$HOME/.zshrc" ]; then
-        if touch "$HOME/.zshrc"; then
-            record_installed "Shell config (~/.zshrc)"
-        else
-            echo "Skipping .zshrc: couldn't create the file." >&2
-            record_skipped "Shell config (.zshrc unavailable)"
-        fi
-    else
-        record_skipped "Shell config (.zshrc already exists)"
+    if [ ! -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ]; then
+        echo "Skipping Oh My Zsh activation and aliases because the framework is incomplete." >&2
+        record_skipped "Oh My Zsh activation and aliases (framework unavailable)"
+        return 0
     fi
+
+    # Install the two Oh My Zsh plugins that are not included in its framework.
+    install_omz_plugin() {
+        local plugin="$1" repository="$2" entry_file="$1.plugin.zsh"
+        local plugin_root="$HOME/.oh-my-zsh/custom/plugins"
+        local plugin_dir="$plugin_root/$plugin"
+        local plugin_stage=""
+        if [ "$plugin" = "zsh-syntax-highlighting" ]; then
+            entry_file="zsh-syntax-highlighting.plugin.zsh"
+        fi
+        if [ -d "$plugin_dir" ]; then
+            record_skipped "Oh My Zsh plugin $plugin (already installed)"
+        elif ! mkdir -p "$plugin_root"; then
+            echo "Skipping Oh My Zsh plugin $plugin: couldn't create the plugin directory." >&2
+            record_skipped "Oh My Zsh plugin $plugin (directory unavailable)"
+        elif plugin_stage="$(mktemp -d)" && git clone --depth 1 "$repository" "$plugin_stage/$plugin" >/dev/null 2>&1 &&
+             [ -f "$plugin_stage/$plugin/$entry_file" ]; then
+            if mv "$plugin_stage/$plugin" "$plugin_dir"; then
+                record_installed "Oh My Zsh plugin $plugin"
+            else
+                echo "Skipping Oh My Zsh plugin $plugin: couldn't install it." >&2
+                record_skipped "Oh My Zsh plugin $plugin (install failed)"
+            fi
+        else
+            echo "Skipping Oh My Zsh plugin $plugin: repository clone failed." >&2
+            record_skipped "Oh My Zsh plugin $plugin (clone failed)"
+        fi
+        [ -z "$plugin_stage" ] || rm -rf "$plugin_stage"
+    }
+
+    install_omz_plugin zsh-autosuggestions https://github.com/zsh-users/zsh-autosuggestions.git
+    install_omz_plugin zsh-syntax-highlighting https://github.com/zsh-users/zsh-syntax-highlighting.git
 
     if ! mkdir -p "$HOME/.oh-my-zsh/custom"; then
         echo "Skipping aliases: couldn't create the custom directory." >&2
@@ -227,6 +286,37 @@ setup_shell_config() {
     else
         echo "Skipping aliases: couldn't create the target file." >&2
         record_skipped "shell aliases (file unavailable)"
+    fi
+
+    # Install the reviewed template after the framework, plugins, and aliases
+    # are ready. Back up any existing personal .zshrc before replacing it.
+    if /usr/bin/grep -Fq '# Managed by toolbox-shortcuts.' "$HOME/.zshrc"; then
+        record_skipped "Shell config (~/.zshrc already uses toolbox-shortcuts template)"
+    elif ensure_file .zshrc.template; then
+        local zshrc_backup="" zshrc_temp=""
+        if [ -f "$HOME/.zshrc" ]; then
+            if zshrc_backup="$(mktemp "$HOME/.zshrc.toolbox-backup.XXXXXX")" && cp -p "$HOME/.zshrc" "$zshrc_backup"; then
+                echo "Backed up the existing ~/.zshrc to $zshrc_backup."
+            else
+                [ -z "$zshrc_backup" ] || rm -f "$zshrc_backup"
+                echo "Skipping .zshrc template: couldn't back up the existing file." >&2
+                record_skipped "Shell config template (backup failed)"
+                return 0
+            fi
+        fi
+
+        if zshrc_temp="$(mktemp "$HOME/.zshrc.toolbox-new.XXXXXX")" &&
+           cp "$SCRIPT_DIR/.zshrc.template" "$zshrc_temp" &&
+           mv "$zshrc_temp" "$HOME/.zshrc"; then
+            record_installed "Shell config template (~/.zshrc)"
+        else
+            [ -z "$zshrc_temp" ] || rm -f "$zshrc_temp"
+            echo "Skipping .zshrc template: couldn't install it." >&2
+            record_skipped "Shell config template (install failed)"
+        fi
+    else
+        echo "Skipping .zshrc template: template unavailable." >&2
+        record_skipped "Shell config template (unavailable)"
     fi
 }
 
@@ -376,7 +466,6 @@ fi
 install_formula node
 install_formula python brew-only
 # Install Homebrew tools before Xcode, whose download or license step can be skipped.
-install_formula git brew-only
 install_formula zsh
 install_formula nvm
 install_formula fzf

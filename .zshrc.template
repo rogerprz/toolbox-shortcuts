@@ -1,17 +1,30 @@
+# Managed by toolbox-shortcuts. Review and edit this file as needed.
+
 # Added by Claude Code installer
 export PATH="$HOME/.local/bin:$PATH"
+
 export ZSH="$HOME/.oh-my-zsh"
-
 ZSH_THEME="agnoster"
-plugins=(git node npm macos z zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git node npm macos brew z eza zsh-autosuggestions zsh-syntax-highlighting)
 
+# Load NVM when installed through Homebrew.
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+
+# Load fzf integration when available.
+[ -f "$HOME/.fzf.zsh" ] && source "$HOME/.fzf.zsh"
+
+# Oh My Zsh loads the theme, plugins, and custom/*.zsh files, including
+# ~/.oh-my-zsh/custom/aliases.zsh.
+source "$ZSH/oh-my-zsh.sh"
+
+# Use eza for directory listings, overriding aliases from the eza plugin.
 alias ls="eza --icons"
 alias ll="eza --icons -la"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-source $ZSH/oh-my-zsh.sh
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# User configuration
+# export MANPATH="/usr/local/man:$MANPATH"
+# export LANG=en_US.UTF-8
+# export EDITOR='nvim'
+# export ARCHFLAGS="-arch $(uname -m)"

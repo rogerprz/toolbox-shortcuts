@@ -10,14 +10,14 @@ Open Terminal and run:
 curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash
 ```
 
-The preparation phase installs Homebrew if needed, checks for an existing SSH key, creates an Ed25519 key if none is found, and prepares the Git and Oh My Zsh configuration. It installs VS Code if needed, adds its bundled `code` launcher to `~/.zprofile` (the same PATH setup provided by VS Code's “Shell Command: Install 'code' command in PATH”), and opens these files there for review:
+The preparation phase installs Homebrew if needed, checks for an existing SSH key, creates an Ed25519 key if none is found, and prepares the Git and Oh My Zsh configuration. It verifies that the Oh My Zsh framework itself is installed, repairs incomplete installs, installs `zsh-autosuggestions` and `zsh-syntax-highlighting` from their Git repositories, and configures the `agnoster` theme and requested plugins in `~/.zshrc`. It installs VS Code if needed, adds its bundled `code` launcher to `~/.zprofile` (the same PATH setup provided by VS Code's “Shell Command: Install 'code' command in PATH”), and opens these files there for review:
 
 - `~/.gitconfig`
 - `~/.zshrc`
 - `~/.zprofile` (includes the VS Code `code` command path)
 - `~/.oh-my-zsh/custom/aliases.zsh`
 
-Edit and save the files in VS Code before continuing. Existing `.gitconfig`, `.zshrc`, `.zprofile`, alias files, and default SSH keys are preserved rather than replaced. If the Oh My Zsh custom directory or aliases file is missing, setup creates it; if the alias template cannot be fetched, it creates an empty file for you to edit. Open a new Terminal window (or run `source ~/.zprofile`) for the updated `code` command path to load in your shell.
+Edit and save the files in VS Code before continuing. Once Oh My Zsh and its plugins are ready, setup backs up an existing `~/.zshrc` and installs this repository's `.zshrc.template` as the replacement. Later setup runs leave that managed file and your edits in place. The template configures the `agnoster` theme, the requested plugins, NVM and fzf integrations, and eza aliases. Setup copies this repository's `alias_for_bashrc` into `~/.oh-my-zsh/custom/aliases.zsh`; Oh My Zsh automatically loads custom `.zsh` files when it starts. Existing `.gitconfig`, `.zprofile`, alias files, and default SSH keys are preserved rather than replaced. If the Oh My Zsh custom directory or aliases file is missing, setup creates it; if the alias template cannot be fetched, it creates an empty file for you to edit. Open a new Terminal window (or run `source ~/.zprofile`) for the updated `code` command path to load in your shell.
 
 If a new SSH key is created, setup uses your global Git email when available; otherwise, it asks for your email. `ssh-keygen` then prompts for an optional passphrase. The public key is copied to your clipboard when possible. Add it to [your GitHub SSH keys](https://github.com/settings/ssh/new) before using SSH with GitHub.
 
