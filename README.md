@@ -1,8 +1,8 @@
 # shortcuts
-enable to turn on/off features in ADO
-`document.cookie = "features-dev-mode=true;path=/"`
 
+## New Mac Setup 
 
+Checkout [Setup.md](./SETUP.md)
 ## Git
 
 - [.gitconfig](./gitconfig-template) template
