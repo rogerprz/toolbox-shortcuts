@@ -10,13 +10,14 @@ Open Terminal and run:
 curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash
 ```
 
-The preparation phase installs Homebrew if needed, checks for an existing SSH key, creates an Ed25519 key if none is found, and prepares the Git and Oh My Zsh configuration. It installs VS Code if needed and opens these files there for review:
+The preparation phase installs Homebrew if needed, checks for an existing SSH key, creates an Ed25519 key if none is found, and prepares the Git and Oh My Zsh configuration. It installs VS Code if needed, adds its bundled `code` launcher to `~/.zprofile` (the same PATH setup provided by VS Code's “Shell Command: Install 'code' command in PATH”), and opens these files there for review:
 
 - `~/.gitconfig`
 - `~/.zshrc`
+- `~/.zprofile` (includes the VS Code `code` command path)
 - `~/.oh-my-zsh/custom/aliases.zsh`
 
-Edit and save the files in VS Code before continuing. Existing `.gitconfig`, `.zshrc`, alias files, and default SSH keys are preserved rather than replaced.
+Edit and save the files in VS Code before continuing. Existing `.gitconfig`, `.zshrc`, `.zprofile`, alias files, and default SSH keys are preserved rather than replaced. If the Oh My Zsh custom directory or aliases file is missing, setup creates it; if the alias template cannot be fetched, it creates an empty file for you to edit. Open a new Terminal window (or run `source ~/.zprofile`) for the updated `code` command path to load in your shell.
 
 If a new SSH key is created, setup uses your global Git email when available; otherwise, it asks for your email. `ssh-keygen` then prompts for an optional passphrase. The public key is copied to your clipboard when possible. Add it to [your GitHub SSH keys](https://github.com/settings/ssh/new) before using SSH with GitHub.
 

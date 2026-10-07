@@ -216,8 +216,11 @@ setup_shell_config() {
         record_skipped "shell aliases (existing file preserved)"
     elif ensure_file alias_for_bashrc && cp "$SCRIPT_DIR/alias_for_bashrc" "$HOME/.oh-my-zsh/custom/aliases.zsh"; then
         record_installed "shell aliases"
+    elif touch "$HOME/.oh-my-zsh/custom/aliases.zsh"; then
+        echo "Created an empty aliases.zsh so it is ready to edit in VS Code." >&2
+        record_skipped "shell aliases template (unavailable; empty file created)"
     else
-        echo "Skipping aliases: couldn't install the file." >&2
+        echo "Skipping aliases: couldn't create the target file." >&2
         record_skipped "shell aliases (file unavailable)"
     fi
 }
@@ -271,10 +274,51 @@ setup_ssh_key() {
     fi
 }
 
+install_code_command() {
+    local code_dir="" candidate profile="$HOME/.zprofile"
+    if command -v code >/dev/null 2>&1; then
+        record_skipped "VS Code code command (already in PATH)"
+        return 0
+    fi
+    for candidate in "/Applications/Visual Studio Code.app/Contents/Resources/app/bin" \
+                     "$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin"; do
+        if [ -x "$candidate/code" ]; then
+            code_dir="$candidate"
+            break
+        fi
+    done
+    if [ -z "$code_dir" ]; then
+        echo "Skipping VS Code CLI setup: couldn't find the code launcher in the app." >&2
+        record_skipped "VS Code code command (launcher unavailable)"
+        return 0
+    fi
+    if ! touch "$profile"; then
+        echo "Skipping VS Code CLI setup: couldn't update ~/.zprofile." >&2
+        record_skipped "VS Code code command (.zprofile unavailable)"
+        return 0
+    fi
+    if ! /usr/bin/grep -Fq "$code_dir" "$profile"; then
+        if ! /usr/bin/printf '\n# Visual Studio Code command line\nexport PATH="$PATH:%s"\n' "$code_dir" >> "$profile"; then
+            echo "Skipping VS Code CLI setup: couldn't update ~/.zprofile." >&2
+            record_skipped "VS Code code command (.zprofile update failed)"
+            return 0
+        fi
+    fi
+    PATH="$code_dir:$PATH"
+    export PATH
+    if command -v code >/dev/null 2>&1; then
+        echo "Added the VS Code Shell Command ('code') to PATH; new terminals will load ~/.zprofile."
+        record_installed "VS Code code command (PATH)"
+    else
+        echo "Skipping VS Code CLI setup: the code launcher isn't executable." >&2
+        record_skipped "VS Code code command (launcher failed)"
+    fi
+}
+
 open_setup_files() {
     if app_present "Visual Studio Code.app" || brew list --cask visual-studio-code >/dev/null 2>&1; then
-        if open -a "Visual Studio Code" "$HOME/.gitconfig" "$HOME/.zshrc" "$HOME/.oh-my-zsh/custom/aliases.zsh"; then
-            record_opened "Git config, .zshrc, and aliases in Visual Studio Code"
+        if open -a "Visual Studio Code" "$HOME/.gitconfig" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.oh-my-zsh/custom/aliases.zsh"; then
+            record_opened "Git config, .zshrc, .zprofile, and aliases in Visual Studio Code"
         else
             echo "Couldn't open the setup files in VS Code; continuing." >&2
             record_skipped "Setup files in Visual Studio Code (open failed)"
@@ -290,6 +334,7 @@ setup_git_config
 setup_ssh_key
 setup_shell_config
 install_cask visual-studio-code "Visual Studio Code.app"
+install_code_command
 if [ "$SETUP_MODE" = "--configure" ]; then
     open_setup_files
     echo "Configuration is ready. Review the files in VS Code, then run the install phase:"
