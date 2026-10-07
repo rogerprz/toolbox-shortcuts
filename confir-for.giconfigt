@@ -1,5 +1,0 @@
-[user]
-	name = "Roger Perez"
-	email = ropere@microsoft.com
-[credential "azrepos:org/microsoftit"]
-	username = ropere@microsoft.com

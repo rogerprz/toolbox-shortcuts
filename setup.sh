@@ -1,11 +1,32 @@
 #!/bin/bash
 
 set -euo pipefail
-SETUP_MODE="${1:---configure}"
-case "$SETUP_MODE" in
-    --configure|--install) ;;
-    *) echo "Usage: setup.sh [--configure|--install]" >&2; exit 2 ;;
-esac
+SETUP_MODE="--configure"
+SETUP_GIT_NAME="${SETUP_GIT_NAME:-}"
+SETUP_GIT_EMAIL="${SETUP_GIT_EMAIL:-}"
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --configure|--install)
+            SETUP_MODE="$1"
+            shift
+            ;;
+        --name)
+            if [ "$#" -lt 2 ]; then echo "Missing value for --name" >&2; exit 2; fi
+            SETUP_GIT_NAME="$2"
+            shift 2
+            ;;
+        --email)
+            if [ "$#" -lt 2 ]; then echo "Missing value for --email" >&2; exit 2; fi
+            SETUP_GIT_EMAIL="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: setup.sh [--configure|--install] [--name 'Your Name'] [--email you@example.com]"
+            exit 0
+            ;;
+        *) echo "Unknown option: $1" >&2; echo "Usage: setup.sh [--configure|--install] [--name 'Your Name'] [--email you@example.com]" >&2; exit 2 ;;
+    esac
+done
 RAW_BASE="https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master"
 SETUP_TEMP_DIR=""
 SUMMARY_INSTALLED=()
@@ -24,8 +45,8 @@ record_installed() { SUMMARY_INSTALLED+=("$1"); }
 record_skipped() { SUMMARY_SKIPPED+=("$1"); }
 record_opened() { SUMMARY_OPENED+=("$1"); }
 
-pause_before_exit() {
-    echo "Returning to Terminal in 5 seconds..."
+pause_before_open() {
+    echo "Opening the configuration files in 5 seconds..."
     sleep 5
 }
 
@@ -178,15 +199,57 @@ install_legacy_cask() {
 }
 
 setup_git_config() {
+    local gitconfig_temp=""
     if [ -f "$HOME/.gitconfig" ]; then
-        echo "Keeping existing ~/.gitconfig for you to review/edit."
-        record_skipped "Git config (existing file preserved)"
-    elif ensure_file .gitconfig && cp "$SCRIPT_DIR/.gitconfig" "$HOME/.gitconfig"; then
+        if update_todo_git_identity "$HOME/.gitconfig"; then
+            if [ "$GIT_IDENTITY_UPDATED" -eq 1 ]; then
+                record_installed "Git identity in existing ~/.gitconfig"
+            else
+                echo "Keeping existing ~/.gitconfig for you to review/edit."
+                record_skipped "Git config (existing file preserved)"
+            fi
+            report_git_identity_placeholders "$HOME/.gitconfig"
+        else
+            echo "Keeping existing ~/.gitconfig for you to review/edit."
+            record_skipped "Git config (existing file preserved)"
+        fi
+    elif ensure_file .gitconfig && gitconfig_temp="$(mktemp "$HOME/.gitconfig.toolbox-new.XXXXXX")" &&
+         cp "$SCRIPT_DIR/.gitconfig" "$gitconfig_temp" &&
+         update_todo_git_identity "$gitconfig_temp" &&
+         mv "$gitconfig_temp" "$HOME/.gitconfig"; then
         record_installed "Git config (~/.gitconfig)"
+        report_git_identity_placeholders "$HOME/.gitconfig"
     else
+        [ -z "$gitconfig_temp" ] || rm -f "$gitconfig_temp"
         echo "Skipping Git config: couldn't install the file." >&2
         record_skipped "Git config (file unavailable)"
     fi
+}
+
+report_git_identity_placeholders() {
+    local gitconfig_file="$1" current_name current_email
+    current_name="$(git config --file "$gitconfig_file" --get user.name 2>/dev/null || true)"
+    current_email="$(git config --file "$gitconfig_file" --get user.email 2>/dev/null || true)"
+    if [ "$current_name" = "TODO Name" ] || [ "$current_email" = "todo@email.com" ]; then
+        echo "Git identity placeholders remain in ~/.gitconfig; edit them or rerun with --name and --email."
+        record_skipped "Git identity placeholders (~/.gitconfig)"
+    fi
+}
+
+update_todo_git_identity() {
+    local gitconfig_file="$1" current_name current_email
+    GIT_IDENTITY_UPDATED=0
+    current_name="$(git config --file "$gitconfig_file" --get user.name 2>/dev/null || true)"
+    current_email="$(git config --file "$gitconfig_file" --get user.email 2>/dev/null || true)"
+    if [ -n "$SETUP_GIT_NAME" ] && { [ -z "$current_name" ] || [ "$current_name" = "TODO Name" ]; }; then
+        git config --file "$gitconfig_file" user.name "$SETUP_GIT_NAME" || return 1
+        GIT_IDENTITY_UPDATED=1
+    fi
+    if [ -n "$SETUP_GIT_EMAIL" ] && { [ -z "$current_email" ] || [ "$current_email" = "todo@email.com" ]; }; then
+        git config --file "$gitconfig_file" user.email "$SETUP_GIT_EMAIL" || return 1
+        GIT_IDENTITY_UPDATED=1
+    fi
+    return 0
 }
 
 setup_shell_config() {
@@ -343,6 +406,9 @@ setup_ssh_key() {
         return 0
     fi
     ssh_email="$(git config --global user.email 2>/dev/null || true)"
+    if [ -z "$ssh_email" ] || [ "$ssh_email" = "todo@email.com" ]; then
+        ssh_email="$SETUP_GIT_EMAIL"
+    fi
     if [ -z "$ssh_email" ]; then
         read -r -p "Email address for your new SSH key: " ssh_email </dev/tty || ssh_email=""
     fi
@@ -350,6 +416,11 @@ setup_ssh_key() {
         echo "Skipping SSH key setup: no email address was provided." >&2
         record_skipped "SSH key (email not provided)"
         return 0
+    fi
+    local current_git_email
+    current_git_email="$(git config --global user.email 2>/dev/null || true)"
+    if [ "$current_git_email" = "todo@email.com" ] && [ -n "$ssh_email" ]; then
+        git config --global user.email "$ssh_email" && record_installed "Git email from SSH key prompt" || true
     fi
 
     echo "Creating an Ed25519 SSH key. You can enter a passphrase or press Return for none."
@@ -455,11 +526,11 @@ setup_shell_config
 install_cask visual-studio-code "Visual Studio Code.app"
 install_code_command
 if [ "$SETUP_MODE" = "--configure" ]; then
+    pause_before_open
     open_setup_files
     echo "Configuration is ready. Review the files in VS Code, then run the install phase:"
     echo "curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash -s -- --install"
     print_summary
-    pause_before_exit
     exit 0
 fi
 
@@ -608,4 +679,3 @@ else
 fi
 
 print_summary
-pause_before_exit

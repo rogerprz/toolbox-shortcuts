@@ -10,6 +10,14 @@ Open Terminal and run:
 curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash
 ```
 
+Optionally provide your Git name and email so setup can fill those values into a new `~/.gitconfig` (or replace TODO placeholders in an existing one):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash -s -- --name "Your Name" --email you@example.com
+```
+
+For a local checkout, use `bash setup.sh --name "Your Name" --email you@example.com`. If you omit either option, its `TODO Name` or `todo@email.com` placeholder remains for you to edit. Existing non-placeholder Git identity values are kept. You can also pass these options with `--install` if you need to fill a placeholder during the second phase.
+
 The preparation phase installs Homebrew if needed, checks for an existing SSH key, creates an Ed25519 key if none is found, and prepares the Git and Oh My Zsh configuration. It verifies that the Oh My Zsh framework itself is installed, repairs incomplete installs, installs `zsh-autosuggestions` and `zsh-syntax-highlighting` from their Git repositories, and configures the `agnoster` theme and requested plugins in `~/.zshrc`. It installs VS Code if needed, adds its bundled `code` launcher to `~/.zprofile` (the same PATH setup provided by VS Code's “Shell Command: Install 'code' command in PATH”), and opens these files there for review:
 
 - `~/.gitconfig`
@@ -19,7 +27,7 @@ The preparation phase installs Homebrew if needed, checks for an existing SSH ke
 
 Edit and save the files in VS Code before continuing. Once Oh My Zsh and its plugins are ready, setup backs up an existing `~/.zshrc` and installs this repository's `.zshrc.template` as the replacement. Later setup runs leave that managed file and your edits in place. The template configures the `agnoster` theme, the requested plugins, NVM and fzf integrations, and eza aliases. Setup copies this repository's `alias_for_bashrc` into `~/.oh-my-zsh/custom/aliases.zsh`; Oh My Zsh automatically loads custom `.zsh` files when it starts. Existing `.gitconfig`, `.zprofile`, alias files, and default SSH keys are preserved rather than replaced. If the Oh My Zsh custom directory or aliases file is missing, setup creates it; if the alias template cannot be fetched, it creates an empty file for you to edit. Open a new Terminal window (or run `source ~/.zprofile`) for the updated `code` command path to load in your shell.
 
-If a new SSH key is created, setup uses your global Git email when available; otherwise, it asks for your email. `ssh-keygen` then prompts for an optional passphrase. The public key is copied to your clipboard when possible. Add it to [your GitHub SSH keys](https://github.com/settings/ssh/new) before using SSH with GitHub.
+If a new SSH key is created, setup uses the provided `--email` value or your configured Git email; if neither is set, it asks for an email. `ssh-keygen` then prompts for an optional passphrase. The public key is copied to your clipboard when possible. Add it to [your GitHub SSH keys](https://github.com/settings/ssh/new) before using SSH with GitHub.
 
 ## 2. Install the rest of the tools
 

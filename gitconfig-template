@@ -1,7 +1,7 @@
 [user]
-	name = Roger Perez
-	email = rogerprz@github.com
-	username = rogerprz
+	name = TODO Name
+	email = todo@email.com
+	username = TODO GitHub username
 [core]
 	editor = code --new-window --wait
 	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
@@ -9,7 +9,7 @@
 # [sendemail]
 # 	smtpencryption = tls
 # 	smtpserver = smtp.gmail.com
-# 	smtpuser = rogerprz@github.com
+# 	smtpuser = todo@email.com
 # 	smtppass = password
 # 	smtpserverport = 587
 [format]
@@ -63,7 +63,7 @@
 	plus-empty-line-marker-style = normal normal
 	line-numbers-right-format = "{np:^4}│ "
 [github]
-	user = rogerprz
+	user = TODO GitHub username
 	token = token
 [gitflow "prefix"]
 	versiontag = v

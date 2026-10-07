@@ -1,17 +1,17 @@
 # ==============================================================================
-# Default personal identity
+# Default Git identity
 # ==============================================================================
 [user]
-	name = Roger Perez
-	email = rogerperez.us@gmail.com
+	name = TODO Name
+	email = todo@email.com
 
 
 # ==============================================================================
 # Repository-specific configuration
 # ==============================================================================
-# Repositories under this directory also load ~/.gitconfig-webflow.
-[includeIf "gitdir:/Users/roger/Sites/webflow/"]
-	path = ~/.gitconfig-webflow
+# Example: enable a separate identity/config for selected repositories.
+# [includeIf "gitdir:~/Sites/your-work-repositories/"]
+# 	path = ~/.gitconfig-work
 
 
 # ==============================================================================
