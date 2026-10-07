@@ -321,16 +321,25 @@ install_code_command() {
 }
 
 open_setup_files() {
-    if app_present "Visual Studio Code.app" || brew list --cask visual-studio-code >/dev/null 2>&1; then
-        if open -a "Visual Studio Code" "$HOME/.gitconfig" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.oh-my-zsh/custom/aliases.zsh"; then
+    local code_launcher="$(command -v code 2>/dev/null || true)"
+    if [ -z "$code_launcher" ]; then
+        for code_launcher in \
+            "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" \
+            "$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"; do
+            if [ -x "$code_launcher" ]; then break; fi
+        done
+    fi
+
+    if [ -n "$code_launcher" ] && [ -x "$code_launcher" ]; then
+        if "$code_launcher" --new-window "$HOME/.gitconfig" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.oh-my-zsh/custom/aliases.zsh"; then
             record_opened "Git config, .zshrc, .zprofile, and aliases in Visual Studio Code"
         else
-            echo "Couldn't open the setup files in VS Code; continuing." >&2
-            record_skipped "Setup files in Visual Studio Code (open failed)"
+            echo "Couldn't open the setup files with VS Code's code launcher; continuing." >&2
+            record_skipped "Setup files in Visual Studio Code (code launcher failed)"
         fi
     else
-        echo "Skipping config editor: Visual Studio Code isn't installed." >&2
-        record_skipped "Setup files in Visual Studio Code (VS Code unavailable)"
+        echo "Skipping config editor: VS Code's code launcher isn't available." >&2
+        record_skipped "Setup files in Visual Studio Code (code launcher unavailable)"
     fi
 }
 
