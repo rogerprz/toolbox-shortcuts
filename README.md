@@ -1,47 +1,45 @@
-# Setup for a new MacBook
+# Prepare a Mac for coding
 
-This repository's main purpose is to make a new MacBook ready for coding with as little manual setup as possible. Run the setup command from Terminal:
+This repository helps set up a new MacBook with minimal manual work. The setup is split into two phases so you can review your personal configuration before the rest of the tools and apps are installed.
+
+## 1. Prepare your account and review configuration
+
+Open Terminal and run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash
 ```
 
-The command downloads and runs the current `master` version of `setup.sh`. Changes in your local checkout will not be included until they are committed and pushed to GitHub.
+The preparation phase installs Homebrew if needed, checks for an existing SSH key, creates an Ed25519 key if none is found, and prepares the Git and Oh My Zsh configuration. It installs VS Code if needed and opens these files there for review:
 
-## What setup does
+- `~/.gitconfig`
+- `~/.zshrc`
+- `~/.oh-my-zsh/custom/aliases.zsh`
 
-The script checks for existing tools and apps, installs missing ones, and prints an installed, skipped, and opened summary at the end. Homebrew is used for the command-line tools and Mac apps. Xcode is installed from the Mac App Store because Apple distributes it there; the script checks the latest release and installs or updates it when the current macOS version supports it.
+Edit and save the files in VS Code before continuing. Existing `.gitconfig`, `.zshrc`, alias files, and default SSH keys are preserved rather than replaced.
 
-It sets Chrome as the default browser, accepts the Xcode license when Xcode is installed, configures the repository's Git settings, and opens iTerm2, Visual Studio Code, and Xcode when available.
+If a new SSH key is created, setup uses your global Git email when available; otherwise, it asks for your email. `ssh-keygen` then prompts for an optional passphrase. The public key is copied to your clipboard when possible. Add it to [your GitHub SSH keys](https://github.com/settings/ssh/new) before using SSH with GitHub.
 
-## SSH key setup
+## 2. Install the rest of the tools
 
-If no default SSH key is found in `~/.ssh` (`id_ed25519`, `id_rsa`, or `id_ecdsa`), setup creates an Ed25519 key. It uses the email in your global Git config when available; otherwise, it asks for one. `ssh-keygen` then asks whether you want to protect the private key with a passphrase. The public key is copied to your clipboard when `pbcopy` is available.
-
-Add the public key to your GitHub account at [github.com/settings/ssh/new](https://github.com/settings/ssh/new) before using SSH to access GitHub repositories. If the key was copied, paste it into GitHub's key field. To verify access afterward, run:
+After reviewing and saving your configuration, run:
 
 ```bash
-ssh -T git@github.com
+curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash -s -- --install
 ```
 
-The script never replaces a detected default key.
+This phase checks for installed items and installs the missing ones. Homebrew installs the command-line tools and Mac apps. Xcode comes from the Mac App Store; the script checks the latest release and installs or updates it when your macOS version supports it. If Xcode needs a newer macOS, setup skips that step and continues.
 
-## Prompts and prerequisites
+The script also sets Chrome as the default browser when Chrome is installed, accepts the Xcode license when Xcode is present, and opens iTerm2, VS Code, and Xcode when available. At the end, it prints what it installed or configured, what it skipped and why, and which apps it opened.
 
-Run the command in macOS Terminal so setup can use the terminal for Homebrew and SSH prompts. Depending on what needs installing, setup may ask for your Mac administrator password, App Store sign-in, and an SSH key passphrase. Xcode's latest version may require a newer macOS; in that case, setup skips the Xcode update and explains the requirement while continuing with the other items.
+Run both commands in macOS Terminal so setup can prompt for Homebrew administrator access, SSH key details, App Store sign-in, or the Xcode license when needed. The commands download the current `master` version; local edits will be available only after they are committed and pushed to GitHub.
 
 ## Included tools and apps
-
-The setup script installs these when they are missing:
 
 - Command-line tools: Node.js, Python 3, Git, zsh, nvm, fzf, bat, eza, ripgrep, tldr, GitHub CLI, and HTTPie.
 - Mac apps: Visual Studio Code, Google Chrome, ChatGPT, Claude, and iTerm2.
 - Requested legacy versions: Alfred 3 and Snagit 2022.
 - Xcode through the Mac App Store.
-
-## Run setup again
-
-The script checks for installed items, so you can rerun the same command after an interrupted setup. Review its final summary for anything it skipped, then rerun or complete any account-specific step such as adding your SSH public key to GitHub.
 
 ## Other repository notes
 

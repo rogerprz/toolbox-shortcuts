@@ -172,7 +172,7 @@ install_legacy_cask() {
     fi
 }
 
-setup_config_files() {
+setup_git_config() {
     if [ -f "$HOME/.gitconfig" ]; then
         echo "Keeping existing ~/.gitconfig for you to review/edit."
         record_skipped "Git config (existing file preserved)"
@@ -182,7 +182,9 @@ setup_config_files() {
         echo "Skipping Git config: couldn't install the file." >&2
         record_skipped "Git config (file unavailable)"
     fi
+}
 
+setup_shell_config() {
     if [ ! -d "$HOME/.oh-my-zsh" ]; then
         echo "Installing Oh My Zsh..."
         if ! omz_installer="$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" ||
@@ -194,6 +196,17 @@ setup_config_files() {
         fi
     else
         record_skipped "Oh My Zsh (already installed)"
+    fi
+
+    if [ ! -f "$HOME/.zshrc" ]; then
+        if touch "$HOME/.zshrc"; then
+            record_installed "Shell config (~/.zshrc)"
+        else
+            echo "Skipping .zshrc: couldn't create the file." >&2
+            record_skipped "Shell config (.zshrc unavailable)"
+        fi
+    else
+        record_skipped "Shell config (.zshrc already exists)"
     fi
 
     if ! mkdir -p "$HOME/.oh-my-zsh/custom"; then
@@ -272,9 +285,10 @@ open_setup_files() {
     fi
 }
 
-# Prepare identity and editable settings before installing the rest of the tools.
-setup_config_files
+# Prepare identity first, then make editable settings available before the app installs.
+setup_git_config
 setup_ssh_key
+setup_shell_config
 install_cask visual-studio-code "Visual Studio Code.app"
 if [ "$SETUP_MODE" = "--configure" ]; then
     open_setup_files
