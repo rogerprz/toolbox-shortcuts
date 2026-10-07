@@ -24,6 +24,11 @@ record_installed() { SUMMARY_INSTALLED+=("$1"); }
 record_skipped() { SUMMARY_SKIPPED+=("$1"); }
 record_opened() { SUMMARY_OPENED+=("$1"); }
 
+pause_before_exit() {
+    echo "Returning to Terminal in 5 seconds..."
+    sleep 5
+}
+
 print_summary() {
     echo
     printf '%s\n' "========================================" "Setup summary" "========================================"
@@ -340,6 +345,7 @@ if [ "$SETUP_MODE" = "--configure" ]; then
     echo "Configuration is ready. Review the files in VS Code, then run the install phase:"
     echo "curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash -s -- --install"
     print_summary
+    pause_before_exit
     exit 0
 fi
 
@@ -489,3 +495,4 @@ else
 fi
 
 print_summary
+pause_before_exit
