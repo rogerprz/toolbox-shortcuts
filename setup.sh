@@ -281,6 +281,11 @@ setup_ssh_key() {
 
 install_code_command() {
     local code_dir="" candidate profile="$HOME/.zprofile"
+    if ! touch "$profile"; then
+        echo "Skipping VS Code CLI setup: couldn't create ~/.zprofile." >&2
+        record_skipped "VS Code code command (.zprofile unavailable)"
+        return 0
+    fi
     if command -v code >/dev/null 2>&1; then
         record_skipped "VS Code code command (already in PATH)"
         return 0
@@ -321,7 +326,8 @@ install_code_command() {
 }
 
 open_setup_files() {
-    local code_launcher="$(command -v code 2>/dev/null || true)"
+    local code_launcher="$(command -v code 2>/dev/null || true)" setup_file
+    local setup_files=()
     if [ -z "$code_launcher" ]; then
         for code_launcher in \
             "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" \
@@ -330,16 +336,25 @@ open_setup_files() {
         done
     fi
 
-    if [ -n "$code_launcher" ] && [ -x "$code_launcher" ]; then
-        if "$code_launcher" --new-window "$HOME/.gitconfig" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.oh-my-zsh/custom/aliases.zsh"; then
-            record_opened "Git config, .zshrc, .zprofile, and aliases in Visual Studio Code"
+    for setup_file in "$HOME/.gitconfig" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.oh-my-zsh/custom/aliases.zsh"; do
+        if [ -f "$setup_file" ]; then
+            setup_files+=("$setup_file")
         else
-            echo "Couldn't open the setup files with VS Code's code launcher; continuing." >&2
+            echo "Skipping missing config file: $setup_file" >&2
+            record_skipped "Config file ($setup_file missing)"
+        fi
+    done
+
+    if [ -n "$code_launcher" ] && [ -x "$code_launcher" ] && [ "${#setup_files[@]}" -gt 0 ]; then
+        if "$code_launcher" --new-window "${setup_files[@]}"; then
+            record_opened "Configuration files in Visual Studio Code"
+        else
+            echo "Couldn't open the configuration files with VS Code's code launcher; continuing." >&2
             record_skipped "Setup files in Visual Studio Code (code launcher failed)"
         fi
     else
-        echo "Skipping config editor: VS Code's code launcher isn't available." >&2
-        record_skipped "Setup files in Visual Studio Code (code launcher unavailable)"
+        echo "Skipping config editor: VS Code's code launcher or config files aren't available." >&2
+        record_skipped "Setup files in Visual Studio Code (launcher or files unavailable)"
     fi
 }
 
