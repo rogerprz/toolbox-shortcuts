@@ -1,80 +1,50 @@
-# shortcuts
+# Setup for a new MacBook
 
-## New Mac Setup 
+This repository's main purpose is to make a new MacBook ready for coding with as little manual setup as possible. Run the setup command from Terminal:
 
-Checkout [Setup.md](./SETUP.md)
-## Git
-
-- [.gitconfig](./gitconfig-template) template
-- [Useful commands](./gitCommands.md) 
-
-### Review local git config and edit
-
-- `--local`: This option specifies that you want to edit the local configuration file for the current Git repository. The local configuration is specific to a particular repository and is stored in the .git/config file within that repository.
-- `-e`: This option opens the configuration file in the default text editor. It stands for "edit."
-
-**Uses:**
-- When you clone a git repository and you're trying to push it to a new remote origin. You can delete content or update origin data to point to correct version
-- Review the current git configurations and make changes
-```
-git config --local -e
+```bash
+curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash
 ```
 
-### Git Remote Origin 
+The command downloads and runs the current `master` version of `setup.sh`. Changes in your local checkout will not be included until they are committed and pushed to GitHub.
 
-command : `git config --get remote.origin.url` gets remote origin url
+## What setup does
 
-Output 
-```
-https://github.com/rogerprz/toolbox-shortcuts.git
-```
-command: `git remote show origin` shows the remote origin url in detail
+The script checks for existing tools and apps, installs missing ones, and prints an installed, skipped, and opened summary at the end. Homebrew is used for the command-line tools and Mac apps. Xcode is installed from the Mac App Store because Apple distributes it there; the script checks the latest release and installs or updates it when the current macOS version supports it.
 
-Output: 
-```
+It sets Chrome as the default browser, accepts the Xcode license when Xcode is installed, configures the repository's Git settings, and opens iTerm2, Visual Studio Code, and Xcode when available.
 
-remote origin
-  Fetch URL: https://github.com/rogerprz/toolbox-shortcuts.git
-  Push  URL: https://github.com/rogerprz/toolbox-shortcuts.git
-  HEAD branch: master
-  Remote branch:
-    master tracked
-  Local branch configured for 'git pull':
-    master merges with remote master
-  Local ref configured for 'git push':
-    master pushes to master (up to date)
+## SSH key setup
+
+If no default SSH key is found in `~/.ssh` (`id_ed25519`, `id_rsa`, or `id_ecdsa`), setup creates an Ed25519 key. It uses the email in your global Git config when available; otherwise, it asks for one. `ssh-keygen` then asks whether you want to protect the private key with a passphrase. The public key is copied to your clipboard when `pbcopy` is available.
+
+Add the public key to your GitHub account at [github.com/settings/ssh/new](https://github.com/settings/ssh/new) before using SSH to access GitHub repositories. If the key was copied, paste it into GitHub's key field. To verify access afterward, run:
+
+```bash
+ssh -T git@github.com
 ```
 
-### Remove cached tracked files
-* `git rm -r --cached .`
-* Replace `.` with a specific file name if you want to untrack only a specific file or folder.
+The script never replaces a detected default key.
 
-### Reset git
-* `git reset`
+## Prompts and prerequisites
 
-## Quick shortcuts 
+Run the command in macOS Terminal so setup can use the terminal for Homebrew and SSH prompts. Depending on what needs installing, setup may ask for your Mac administrator password, App Store sign-in, and an SSH key passphrase. Xcode's latest version may require a newer macOS; in that case, setup skips the Xcode update and explains the requirement while continuing with the other items.
 
-* [Git log cheatsheet](https://devhints.io/git-log)
+## Included tools and apps
 
+The setup script installs these when they are missing:
 
-## SSH Keys
+- Command-line tools: Node.js, Python 3, Git, zsh, nvm, fzf, bat, eza, ripgrep, tldr, GitHub CLI, and HTTPie.
+- Mac apps: Visual Studio Code, Google Chrome, ChatGPT, Claude, and iTerm2.
+- Requested legacy versions: Alfred 3 and Snagit 2022.
+- Xcode through the Mac App Store.
 
-* See output `cat ~/.ssh/id_rsa.pub`
+## Run setup again
 
-### Windows
-* Copy `clip < ~/.ssh/id_rsa.pub`
+The script checks for installed items, so you can rerun the same command after an interrupted setup. Review its final summary for anything it skipped, then rerun or complete any account-specific step such as adding your SSH public key to GitHub.
 
-### Macbook
-* `pbcopy < ~/.ssh/id_rsa.pub`
+## Other repository notes
 
-
-## Terminate local host
-### Windows
-
-### Kill process port
-1. netstat -aon | findstr 8080
-2. Look for listen `TCP 0.0.0.0:8080 0.0.0.0:0 LISTEN 77777`
-3. `taskkill /f /pid` 77777
-
-
-
+- [Git commands](./gitCommands.md)
+- [Git config template](./gitconfig-template)
+- [Shortcuts and aliases](./alias_for_bashrc)
