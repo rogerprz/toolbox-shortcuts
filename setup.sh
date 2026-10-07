@@ -4,6 +4,7 @@ set -euo pipefail
 SETUP_MODE="--configure"
 SETUP_GIT_NAME="${SETUP_GIT_NAME:-}"
 SETUP_GIT_EMAIL="${SETUP_GIT_EMAIL:-}"
+SETUP_GIT_USERNAME="${SETUP_GIT_USERNAME:-}"
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --configure|--install)
@@ -20,11 +21,16 @@ while [ "$#" -gt 0 ]; do
             SETUP_GIT_EMAIL="$2"
             shift 2
             ;;
+        --username)
+            if [ "$#" -lt 2 ]; then echo "Missing value for --username" >&2; exit 2; fi
+            SETUP_GIT_USERNAME="$2"
+            shift 2
+            ;;
         -h|--help)
-            echo "Usage: setup.sh [--configure|--install] [--name 'Your Name'] [--email you@example.com]"
+            echo "Usage: setup.sh [--configure|--install] [--name 'Your Name'] [--email you@example.com] [--username your-github-name]"
             exit 0
             ;;
-        *) echo "Unknown option: $1" >&2; echo "Usage: setup.sh [--configure|--install] [--name 'Your Name'] [--email you@example.com]" >&2; exit 2 ;;
+        *) echo "Unknown option: $1" >&2; echo "Usage: setup.sh [--configure|--install] [--name 'Your Name'] [--email you@example.com] [--username your-github-name]" >&2; exit 2 ;;
     esac
 done
 RAW_BASE="https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master"
@@ -32,6 +38,8 @@ SETUP_TEMP_DIR=""
 SUMMARY_INSTALLED=()
 SUMMARY_SKIPPED=()
 SUMMARY_OPENED=()
+SETUP_FILES=()
+SETUP_CODE_LAUNCHER=""
 trap 'if [ -n "$SETUP_TEMP_DIR" ]; then rm -rf "$SETUP_TEMP_DIR"; fi' EXIT
 if [ -n "${BASH_SOURCE[0]:-}" ]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -45,9 +53,13 @@ record_installed() { SUMMARY_INSTALLED+=("$1"); }
 record_skipped() { SUMMARY_SKIPPED+=("$1"); }
 record_opened() { SUMMARY_OPENED+=("$1"); }
 
-pause_before_open() {
-    echo "Opening the configuration files in 5 seconds..."
-    sleep 5
+countdown_before_open() {
+    echo "Opening the configuration files in:"
+    local seconds
+    for seconds in 5 4 3 2 1; do
+        printf '  %s...\n' "$seconds"
+        sleep 1
+    done
 }
 
 print_summary() {
@@ -65,11 +77,13 @@ print_summary() {
     else
         printf '%s\n' 'Skipped: none'
     fi
-    if [ "${#SUMMARY_OPENED[@]}" -gt 0 ]; then
-        printf 'Opened:\n'
-        for item in "${SUMMARY_OPENED[@]}"; do printf '  ↗ %s\n' "$item"; done
-    else
-        printf '%s\n' 'Opened: none'
+    if [ "${1:-}" != "before-open" ]; then
+        if [ "${#SUMMARY_OPENED[@]}" -gt 0 ]; then
+            printf 'Opened:\n'
+            for item in "${SUMMARY_OPENED[@]}"; do printf '  ↗ %s\n' "$item"; done
+        else
+            printf '%s\n' 'Opened: none'
+        fi
     fi
     printf '%s\n' '========================================'
 }
@@ -230,23 +244,30 @@ report_git_identity_placeholders() {
     local gitconfig_file="$1" current_name current_email
     current_name="$(git config --file "$gitconfig_file" --get user.name 2>/dev/null || true)"
     current_email="$(git config --file "$gitconfig_file" --get user.email 2>/dev/null || true)"
-    if [ "$current_name" = "TODO Name" ] || [ "$current_email" = "todo@email.com" ]; then
-        echo "Git identity placeholders remain in ~/.gitconfig; edit them or rerun with --name and --email."
+    local current_username
+    current_username="$(git config --file "$gitconfig_file" --get user.username 2>/dev/null || true)"
+    if [ "$current_name" = "TODO Name" ] || [ "$current_email" = "todo@email.com" ] || [ "$current_username" = "TODO GitHub username" ]; then
+        echo "Git identity placeholders remain in ~/.gitconfig; search for 'todo' and replace the values, or rerun with identity options."
         record_skipped "Git identity placeholders (~/.gitconfig)"
     fi
 }
 
 update_todo_git_identity() {
-    local gitconfig_file="$1" current_name current_email
+    local gitconfig_file="$1" current_name current_email current_username
     GIT_IDENTITY_UPDATED=0
     current_name="$(git config --file "$gitconfig_file" --get user.name 2>/dev/null || true)"
     current_email="$(git config --file "$gitconfig_file" --get user.email 2>/dev/null || true)"
+    current_username="$(git config --file "$gitconfig_file" --get user.username 2>/dev/null || true)"
     if [ -n "$SETUP_GIT_NAME" ] && { [ -z "$current_name" ] || [ "$current_name" = "TODO Name" ]; }; then
         git config --file "$gitconfig_file" user.name "$SETUP_GIT_NAME" || return 1
         GIT_IDENTITY_UPDATED=1
     fi
     if [ -n "$SETUP_GIT_EMAIL" ] && { [ -z "$current_email" ] || [ "$current_email" = "todo@email.com" ]; }; then
         git config --file "$gitconfig_file" user.email "$SETUP_GIT_EMAIL" || return 1
+        GIT_IDENTITY_UPDATED=1
+    fi
+    if [ -n "$SETUP_GIT_USERNAME" ] && { [ -z "$current_username" ] || [ "$current_username" = "TODO GitHub username" ]; }; then
+        git config --file "$gitconfig_file" user.username "$SETUP_GIT_USERNAME" || return 1
         GIT_IDENTITY_UPDATED=1
     fi
     return 0
@@ -486,36 +507,54 @@ install_code_command() {
     fi
 }
 
-open_setup_files() {
-    local code_launcher="$(command -v code 2>/dev/null || true)" setup_file
-    local setup_files=()
-    if [ -z "$code_launcher" ]; then
-        for code_launcher in \
+prepare_setup_files() {
+    local setup_file candidate
+    SETUP_CODE_LAUNCHER="$(command -v code 2>/dev/null || true)"
+    SETUP_FILES=()
+    if [ -z "$SETUP_CODE_LAUNCHER" ]; then
+        for candidate in \
             "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" \
             "$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"; do
-            if [ -x "$code_launcher" ]; then break; fi
+            if [ -x "$candidate" ]; then
+                SETUP_CODE_LAUNCHER="$candidate"
+                break
+            fi
         done
     fi
 
     for setup_file in "$HOME/.gitconfig" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.oh-my-zsh/custom/aliases.zsh"; do
         if [ -f "$setup_file" ]; then
-            setup_files+=("$setup_file")
+            SETUP_FILES+=("$setup_file")
         else
             echo "Skipping missing config file: $setup_file" >&2
             record_skipped "Config file ($setup_file missing)"
         fi
     done
 
-    if [ -n "$code_launcher" ] && [ -x "$code_launcher" ] && [ "${#setup_files[@]}" -gt 0 ]; then
-        if "$code_launcher" --new-window "${setup_files[@]}"; then
+    if [ -z "$SETUP_CODE_LAUNCHER" ] || [ ! -x "$SETUP_CODE_LAUNCHER" ] || [ "${#SETUP_FILES[@]}" -eq 0 ]; then
+        echo "Skipping config editor: VS Code's code launcher or config files aren't available." >&2
+        record_skipped "Setup files in Visual Studio Code (launcher or files unavailable)"
+    fi
+}
+
+announce_setup_files() {
+    if [ -n "$SETUP_CODE_LAUNCHER" ] && [ -x "$SETUP_CODE_LAUNCHER" ] && [ "${#SETUP_FILES[@]}" -gt 0 ]; then
+        echo
+        printf '%s\n' "========================================" "Opening ${#SETUP_FILES[@]} files in Visual Studio Code" "========================================"
+        printf '  • %s\n' "${SETUP_FILES[@]}"
+        echo "Please confirm your name, email, and username by searching for 'todo' in the opened files."
+    fi
+}
+
+open_setup_files() {
+    if [ -n "$SETUP_CODE_LAUNCHER" ] && [ -x "$SETUP_CODE_LAUNCHER" ] && [ "${#SETUP_FILES[@]}" -gt 0 ]; then
+        if "$SETUP_CODE_LAUNCHER" --new-window "${SETUP_FILES[@]}"; then
             record_opened "Configuration files in Visual Studio Code"
+            echo "Opened all configuration files in Visual Studio Code."
         else
             echo "Couldn't open the configuration files with VS Code's code launcher; continuing." >&2
             record_skipped "Setup files in Visual Studio Code (code launcher failed)"
         fi
-    else
-        echo "Skipping config editor: VS Code's code launcher or config files aren't available." >&2
-        record_skipped "Setup files in Visual Studio Code (launcher or files unavailable)"
     fi
 }
 
@@ -526,11 +565,15 @@ setup_shell_config
 install_cask visual-studio-code "Visual Studio Code.app"
 install_code_command
 if [ "$SETUP_MODE" = "--configure" ]; then
-    pause_before_open
-    open_setup_files
-    echo "Configuration is ready. Review the files in VS Code, then run the install phase:"
+    prepare_setup_files
+    echo "Configuration is ready. Review the files after VS Code opens, then run the install phase:"
     echo "curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash -s -- --install"
-    print_summary
+    print_summary before-open
+    announce_setup_files
+    if [ -n "$SETUP_CODE_LAUNCHER" ] && [ -x "$SETUP_CODE_LAUNCHER" ] && [ "${#SETUP_FILES[@]}" -gt 0 ]; then
+        countdown_before_open
+        open_setup_files
+    fi
     exit 0
 fi
 

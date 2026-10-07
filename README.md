@@ -10,13 +10,13 @@ Open Terminal and run:
 curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash
 ```
 
-Optionally provide your Git name and email so setup can fill those values into a new `~/.gitconfig` (or replace TODO placeholders in an existing one):
+Optionally provide your Git name, email, and GitHub username so setup can fill those values into a new `~/.gitconfig` (or replace TODO placeholders in an existing one):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash -s -- --name "Your Name" --email you@example.com
+curl -fsSL https://raw.githubusercontent.com/rogerprz/toolbox-shortcuts/master/setup.sh | bash -s -- --name "Your Name" --email you@example.com --username your-github-name
 ```
 
-For a local checkout, use `bash setup.sh --name "Your Name" --email you@example.com`. If you omit either option, its `TODO Name` or `todo@email.com` placeholder remains for you to edit. Existing non-placeholder Git identity values are kept. You can also pass these options with `--install` if you need to fill a placeholder during the second phase.
+For a local checkout, use `bash setup.sh --name "Your Name" --email you@example.com --username your-github-name`. If you omit an option, its TODO placeholder remains for you to edit. Existing non-placeholder Git identity values are kept. You can also pass these options with `--install` if you need to fill a placeholder during the second phase.
 
 The preparation phase installs Homebrew if needed, checks for an existing SSH key, creates an Ed25519 key if none is found, and prepares the Git and Oh My Zsh configuration. It verifies that the Oh My Zsh framework itself is installed, repairs incomplete installs, installs `zsh-autosuggestions` and `zsh-syntax-highlighting` from their Git repositories, and configures the `agnoster` theme and requested plugins in `~/.zshrc`. It installs VS Code if needed, adds its bundled `code` launcher to `~/.zprofile` (the same PATH setup provided by VS Code's “Shell Command: Install 'code' command in PATH”), and opens these files there for review:
 
