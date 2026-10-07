@@ -127,6 +127,19 @@ install_formula tldr
 install_formula gh
 install_formula httpie
 install_cask visual-studio-code "Visual Studio Code.app"
+install_cask google-chrome "Google Chrome.app"
+if app_present "Google Chrome.app" || brew list --cask google-chrome >/dev/null 2>&1; then
+    install_formula defaultbrowser
+    if command -v defaultbrowser >/dev/null 2>&1; then
+        if ! defaultbrowser chrome; then
+            echo "Skipping Chrome default-browser setting; macOS did not accept the change." >&2
+        fi
+    else
+        echo "Skipping Chrome default-browser setting: defaultbrowser is unavailable." >&2
+    fi
+else
+    echo "Skipping Chrome default-browser setting because Chrome isn't installed." >&2
+fi
 install_cask chatgpt "ChatGPT.app"
 install_cask claude "Claude.app"
 install_cask iterm2 "iTerm.app" "iTerm2.app"
@@ -218,6 +231,28 @@ if ensure_file .gitconfig; then
     cp "$SCRIPT_DIR/.gitconfig" ~/.gitconfig || echo "Skipping Git config: couldn't copy the file." >&2
 else
     echo "Skipping Git config: couldn't download the file." >&2
+fi
+
+open_if_installed() {
+    local display_name="$1" app_name="$2" cask_name="$3"
+    if app_present "$app_name" || brew list --cask "$cask_name" >/dev/null 2>&1; then
+        if ! open -a "$display_name"; then
+            echo "Couldn't open $display_name; continuing setup." >&2
+        fi
+    else
+        echo "Skipping launch of $display_name because it isn't installed."
+    fi
+}
+
+echo "Opening iTerm2, Visual Studio Code, and Xcode..."
+open_if_installed "iTerm" "iTerm.app" iterm2
+open_if_installed "Visual Studio Code" "Visual Studio Code.app" visual-studio-code
+if app_present "Xcode.app" || { xcode-select -p 2>/dev/null | /usr/bin/grep -q '/Xcode[^/]*\.app/Contents/Developer$'; }; then
+    if ! open -a Xcode; then
+        echo "Couldn't open Xcode; continuing setup." >&2
+    fi
+else
+    echo "Skipping launch of Xcode because it isn't installed."
 fi
 
 echo "✅ Setup complete! Some items may have been skipped; review messages above."
