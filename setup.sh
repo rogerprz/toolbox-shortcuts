@@ -589,6 +589,8 @@ install_formula ripgrep
 install_formula tldr
 install_formula gh
 install_formula httpie
+install_formula supabase/tap/supabase supabase
+install_formula getsentry/tools/sentry sentry
 install_cask google-chrome "Google Chrome.app"
 if app_present "Google Chrome.app" || brew list --cask google-chrome >/dev/null 2>&1; then
     install_formula defaultbrowser

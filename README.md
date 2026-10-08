@@ -45,7 +45,7 @@ Run both commands in macOS Terminal so setup can prompt for Homebrew administrat
 
 ## Included tools and apps
 
-- Command-line tools: Node.js, Python 3, Git, zsh, nvm, fzf, bat, eza, ripgrep, tldr, GitHub CLI, and HTTPie.
+- Command-line tools: Node.js, Python 3, Git, zsh, nvm, fzf, bat, eza, ripgrep, tldr, GitHub CLI, HTTPie, Supabase CLI, and Sentry CLI.
 - Mac apps: Visual Studio Code, Google Chrome, ChatGPT, Claude, and iTerm2.
 - Requested versions: Alfred 5 and Snagit 2022.
 - Xcode through the Mac App Store.
